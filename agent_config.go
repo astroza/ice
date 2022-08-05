@@ -178,6 +178,9 @@ type AgentConfig struct {
 	// dial interface in order to support corporate proxies
 	ProxyDialer proxy.Dialer
 
+	// Egress Proxy is used to modify the outgoing packets. It's intended to implement a custom egress proxy
+	EgressProxy PacketConnProxy
+
 	// Deprecated: AcceptAggressiveNomination always enabled.
 	AcceptAggressiveNomination bool
 

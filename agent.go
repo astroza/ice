@@ -145,6 +145,7 @@ type Agent struct {
 	insecureSkipVerify bool
 
 	proxyDialer proxy.Dialer
+	egressProxy PacketConnProxy
 
 	enableUseCandidateCheckPriority bool
 }
@@ -202,6 +203,7 @@ func NewAgent(config *AgentConfig) (*Agent, error) { //nolint:gocognit
 		tcpMux:           config.TCPMux,
 		udpMux:           config.UDPMux,
 		udpMuxSrflx:      config.UDPMuxSrflx,
+		egressProxy:      config.EgressProxy,
 
 		mDNSMode: mDNSMode,
 		mDNSName: mDNSName,
@@ -737,6 +739,9 @@ func (a *Agent) addRemoteCandidate(c Candidate) {
 }
 
 func (a *Agent) addCandidate(ctx context.Context, c Candidate, candidateConn net.PacketConn) error {
+	if a.egressProxy != nil {
+		candidateConn = NewProxiedEgressPacketConn(candidateConn, a.egressProxy)
+	}
 	return a.loop.Run(ctx, func(context.Context) {
 		set := a.localCandidates[c.NetworkType()]
 		for _, candidate := range set {
